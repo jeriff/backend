@@ -91,4 +91,9 @@ class Files extends Controller
 
         return ResponseFailJson($res);
     }
+
+    public function getVideoPic(Request $request)
+    {
+        //TODO 根据key获取video数据 调用7牛云接口获取图片并返回 缓存图片下次调用不用揭晓
+    }
 }

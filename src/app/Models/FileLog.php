@@ -29,4 +29,9 @@ class FileLog extends Model
     protected $table = "file_log";
 
     public $timestamps = false;
+
+    public static function getByKey($key)
+    {
+        return self::where('key',$key)->first();
+    }
 }

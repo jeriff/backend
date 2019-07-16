@@ -22,9 +22,6 @@ class User extends Controller
     public function editUser(Request $request)
     {
         $id = (int)$request->input('id',0);
-        // $name = XssFilter($request->input('name',''));
-        // $gender = (int)$request->input('gender',1);
-        // $avater = XssFilter($request->input('avater',''));
 
         $data = $request->only(['name','gender','avater']);
 
@@ -43,7 +40,7 @@ class User extends Controller
             'avater.exists' => '无效的头像',
         ];
 
-        $validator=Validator::make($data,$rules,$msg);
+        $validator = Validator::make($data,$rules,$msg);
         if($validator->fails()) {
             return ResponseFailJson(array_values($validator->errors()->toArray()));
         }
@@ -52,5 +49,12 @@ class User extends Controller
         $data['create_time'] = isset($user->id) ? $user->create_time : date('Y-m-d H:i:s');
         $res = MUser::updateOrCreate(['id' => $id],$data);
         return ResponseSuccessJson($res);
+    }
+
+    public function getUserDetail(Request $request)
+    {
+        $id = (int)$request->input('id',0);
+        $user = MUser::find($id);
+        return ResponseSuccessJson($user);
     }
 }

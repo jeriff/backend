@@ -25,4 +25,11 @@ class PgcSource extends Model
     protected $table = "pgc_source";
 
     public $timestamps = false;
+
+    public static function getSourceByPgcId($id)
+    {
+        return self::where('pgc_id',$id)
+                    ->orderBy('sort','asc')
+                    ->get();
+    }
 }

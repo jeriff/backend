@@ -1,0 +1,1 @@
+ALTER TABLE pgc ADD COLUMN `label` varchar(50) NOT NULL COMMENT '标签';

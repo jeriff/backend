@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use function foo\func;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -33,4 +34,24 @@ class Pgc extends Model
     protected $table = "pgc";
 
     public $timestamps = false;
+
+    protected $fillable = ['title','cover','uid','uname','content','create_time','label'];
+
+    public static function getPgcList($search,$show_num,$status)
+    {
+        $obj = self::orderBy('create_time','desc');
+
+        if($status){
+            $obj->where('status',$status);
+        }
+
+        if($search !== ''){
+            $obj->where(function($query)use($search){
+                $query->where('title','like','%'.$search.'%')
+                    ->orWhere('label','like','%'.$search.'%');
+            });
+        }
+
+        return $show_num ? $obj->paginate($show_num) : $obj->get();
+    }
 }

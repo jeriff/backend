@@ -27,6 +27,15 @@ Route::group(['middleware' => ['web','auth']], function() {
 
     Route::group(['prefix' => 'user'], function(){
         Route::post('edit', 'User@editUser');
+        Route::get('list', 'User@getUserList');
+        Route::get('detail', 'User@getUserDetail');
+    });
+
+    Route::group(['prefix' => 'pgc'], function(){
+        Route::post('edit', 'Data@editPgc');
+        Route::get('list', 'Data@getPgcList');
+        Route::get('detail', 'Data@getDetail');
+        Route::post('change_status', 'Data@changeStatus');
     });
 });
 

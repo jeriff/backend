@@ -8,6 +8,11 @@ use Session;
 
 class Login extends Controller
 {
+    /**
+     * 登录 admin_test/test
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function in(Request $request)
     {
         if (Session::has('user')){

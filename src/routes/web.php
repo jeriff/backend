@@ -23,6 +23,7 @@ Route::group(['middleware' => ['web','auth']], function() {
 
     Route::group(['prefix' => 'file'], function(){
         Route::post('upload', 'Files@multipleUploadFile');
+        Route::get('down', 'Files@downloadFile');
     });
 
     Route::group(['prefix' => 'user'], function(){

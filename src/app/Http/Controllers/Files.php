@@ -36,7 +36,8 @@ class Files extends Controller
 
         $uploadType = 0;//上传类型 0 未知 1 图片 2 视频
         $uploadNum = 0;//上传数量
-        foreach ($file as $val) {
+        $new_ = [];
+        foreach ($file as $k => $val) {
             $name = $val->getClientOriginalName();
 
             $size = $val->getSize();
@@ -61,6 +62,11 @@ class Files extends Controller
             }
 
             $uploadNum++;
+            $tmp_data[$k] = [
+                'name' => $name,
+                'arrName' => $arrName,
+                'fileType' => $fileType
+            ];
         }
 
         if(($uploadType == 1 && $uploadNum > 9) || ($uploadType == 2 && $uploadNum > 1)){
@@ -68,20 +74,44 @@ class Files extends Controller
         }
 
         $res = [];
+        $disk = \Storage::disk('qiniu');
+        $policy = [
+            'callbackUrl' => 'https://hrm.kingnet.com/callback/upload_res',
+            'callbackHost' => '',
+            'callbackBody' => 'key=$(key)&hash=$(etag)',
+            'callbackBodyType' => 'application/x-www-form-urlencoded',
+            'persistentOps' => 'vsample/jpg/ss/0/t/100/interval/20/pattern/'.\Qiniu\base64_urlSafeEncode('vframe-${key}/$(count)'),
+            'persistentNotifyUrl' => 'https://hrm.kingnet.com/callback/persistent_res',
+            'persistentPipeline' => 'video2pic',
+            'fileType' => 0
+        ];
+        $token = $disk->getDriver()->uploadToken(null,3600,$policy);
+        $disk->getDriver()->withUploadToken($token);
         DB::beginTransaction();
-        foreach ($file as $val){
-            $newName = sprintf('%d%d.%s', time(), mt_rand(1000000000, 9999999999), $fileType);
-            $val->move('/tmp',$newName);
+        foreach ($file as $k => $val){
+            $name = $tmp_data[$k]['name'];
+            $arrName = $tmp_data[$k]['arrName'];
+            $fileType = $tmp_data[$k]['fileType'];
 
-            $res[] = ['key' => $newName, 'name' => $name];
+            $newName = sprintf('%d%d.%s', time(), mt_rand(1000000000, 9999999999), $fileType);
+            $res = $disk->getDriver()->write($newName,$val->getPathname());
+            var_dump($res);die;
             try {
-                FileLog::insert([
-                    'key' => $newName,
-                    'name' => htmlentities($name, ENT_QUOTES, 'UTF-8'),
-                    'uid' => Session::get('user')->id,
-                    'uname' => Session::get('user')->username,
-                    'create_time' => date('Y-m-d H:i:s')
-                ]);
+
+                $uploadRes = $disk->putFileAs('/',$val,$newName);
+                if($uploadRes){
+                    $res[] = ['key' => $newName, 'name' => $name];
+                    FileLog::insert([
+                        'key' => $newName,
+                        'name' => htmlentities($name, ENT_QUOTES, 'UTF-8'),
+                        'uid' => Session::get('user')->id,
+                        'uname' => Session::get('user')->username,
+                        'create_time' => date('Y-m-d H:i:s')
+                    ]);
+                }else{
+                    DB::rollBack();
+                    return ResponseFailJson('文件上传到云失败！');
+                }
             } catch (\Exception $e) {
                 DB::rollBack();
                 return ResponseFailJson('保存文件索引失败！');
@@ -90,6 +120,19 @@ class Files extends Controller
         DB::commit();
 
         return ResponseFailJson($res);
+    }
+
+    public function downloadFile(Request $request)
+    {
+        $key = XssFilter($request->input('key',''));
+
+        $disk = \Storage::disk('qiniu');
+        if($disk->exists($key)){
+            $disk->download($key)->send();
+            exit;
+        }else{
+            return ResponseFailJson('文件不存在');
+        }
     }
 
     public function getVideoPic(Request $request)

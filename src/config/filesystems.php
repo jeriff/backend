@@ -67,13 +67,13 @@ return [
         'qiniu' => [
             'driver'  => 'qiniu',
             'domains' => [
-                'default'   => 'laravelacademy.com1.z0.glb.clouddn.com', //你的七牛域名
-                'https'     => 'dn-laravelacademy.qbox.me',         //你的HTTPS域名
-                'custom'    => 'static.laravelacademy.org',     //你的自定义域名
+                'default'   => 'puqpcz625.bkt.clouddn.com', //你的七牛域名
+                'https'     => '',         //你的HTTPS域名
+                'custom'    => 'puqpcz625.bkt.clouddn.com',     //你的自定义域名
             ],
             'access_key'=> 'rYLHhTZbXFOgwreg6OnXKoK-wQKz2B3stWAtizIA',  //AccessKey
             'secret_key'=> 'B19WdOgCoP724bS8f0LnHLn9ucoJZmBFNaFc3oDZ',  //SecretKey
-            'bucket'    => '',  //Bucket名字
+            'bucket'    => 'xyy_bult',  //Bucket名字
             'notify_url'=> '',  //持久化处理回调地址
         ],
 

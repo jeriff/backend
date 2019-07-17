@@ -75,18 +75,18 @@ class Files extends Controller
 
         $res = [];
         $disk = \Storage::disk('qiniu');
-        $policy = [
-            'callbackUrl' => 'https://hrm.kingnet.com/callback/upload_res',
-            'callbackHost' => '',
-            'callbackBody' => 'key=$(key)&hash=$(etag)',
-            'callbackBodyType' => 'application/x-www-form-urlencoded',
-            'persistentOps' => 'vsample/jpg/ss/0/t/100/interval/20/pattern/'.\Qiniu\base64_urlSafeEncode('vframe-${key}/$(count)'),
-            'persistentNotifyUrl' => 'https://hrm.kingnet.com/callback/persistent_res',
-            'persistentPipeline' => 'video2pic',
-            'fileType' => 0
-        ];
-        $token = $disk->getDriver()->uploadToken(null,3600,$policy);
-        $disk->getDriver()->withUploadToken($token);
+        // $policy = [
+        //     'callbackUrl' => 'https://hrm.kingnet.com/callback/upload_res',
+        //     'callbackHost' => '',
+        //     'callbackBody' => 'key=$(key)&hash=$(etag)',
+        //     'callbackBodyType' => 'application/x-www-form-urlencoded',
+        //     'persistentOps' => 'vsample/jpg/ss/0/t/100/interval/20/pattern/'.\Qiniu\base64_urlSafeEncode('vframe-${key}/$(count)'),
+        //     'persistentNotifyUrl' => 'https://hrm.kingnet.com/callback/persistent_res',
+        //     'persistentPipeline' => 'video2pic',
+        //     'fileType' => 0
+        // ];
+        // $token = $disk->getDriver()->uploadToken(null,3600,$policy);
+        // $disk->getDriver()->withUploadToken($token);
         DB::beginTransaction();
         foreach ($file as $k => $val){
             $name = $tmp_data[$k]['name'];
@@ -94,11 +94,11 @@ class Files extends Controller
             $fileType = $tmp_data[$k]['fileType'];
 
             $newName = sprintf('%d%d.%s', time(), mt_rand(1000000000, 9999999999), $fileType);
-            $res = $disk->getDriver()->write($newName,$val->getPathname());
-            var_dump($res);die;
+            // $res = $disk->getDriver()->write($newName,$val->getPathname());
+            // var_dump($res);die;
+            $uploadRes = $disk->putFileAs('/',$val,$newName);
             try {
-
-                $uploadRes = $disk->putFileAs('/',$val,$newName);
+                //$uploadRes = $disk->putFileAs('/',$val,$newName);
                 if($uploadRes){
                     $res[] = ['key' => $newName, 'name' => $name];
                     FileLog::insert([
